@@ -47,6 +47,10 @@ test {
     useJUnitPlatform()
 }
 
+bootRun {
+    args = ["--spring.profiles.active=local"]
+}
+
 jib {
     from {
         image = 'gcr.io/distroless/java17-debian11'
