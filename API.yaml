@@ -1,0 +1,69 @@
+openapi: 3.0.1
+info:
+  title: Live Notifications
+  description: |
+    Service providing live notifications using SSE
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: notifications
+paths:
+  /notifications/{channelId}:
+    post:
+      tags:
+        - notifications
+      parameters:
+        - name: channelId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+      responses:
+        200:
+          description: saved notification
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+    get:
+      tags:
+        - notifications
+      parameters:
+        - name: channelId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: recent notifications on the channel
+          content:
+            "text/event-stream":
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+
+components:
+  schemas:
+    NotificationRequest:
+      type: object
+      properties:
+        payload:
+          type: object
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+        creationDate:
+          type: string
+          format: date-time
+        payload:
+          type: object

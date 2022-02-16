@@ -1,0 +1,4 @@
+bigtable:
+  instance-id: 'bus-instance'
+  project-id: 'project-id'
+  emulator-port: 8086
