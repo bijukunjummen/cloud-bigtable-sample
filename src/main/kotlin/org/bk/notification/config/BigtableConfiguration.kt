@@ -33,7 +33,10 @@ class BigtableConfiguration {
         settingsBuilder
             .stubSettings()
             .setTransportChannelProvider(
-                EnhancedBigtableStubSettings.defaultTransportChannelProvider().withPoolSize(10)
+                EnhancedBigtableStubSettings
+                    .defaultGrpcTransportProviderBuilder()
+                    .setPoolSize(10)
+                    .build()
             )
 
         return BigtableDataClient

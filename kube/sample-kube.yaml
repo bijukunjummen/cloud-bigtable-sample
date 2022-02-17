@@ -31,7 +31,7 @@ spec:
       serviceAccountName: cloud-bigtable-sample-sa
       containers:
         - name: cloud-bigtable-sample
-          image: us-docker.pkg.dev/biju-altostrat-demo/docker-repo/cloud-bigtable-sample:ffd6571
+          image: us-docker.pkg.dev/biju-altostrat-demo/docker-repo/cloud-bigtable-sample:94bd21e
           imagePullPolicy: IfNotPresent
           env:
             - name: SPRING_PROFILES_ACTIVE
