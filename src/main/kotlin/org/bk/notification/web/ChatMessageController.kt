@@ -4,6 +4,7 @@ import org.bk.notification.model.ChatMessage
 import org.bk.notification.service.ChatMessageHandler
 import org.bk.notification.web.model.ChatMessageRequest
 import org.springframework.http.ResponseEntity
+import org.springframework.util.StopWatch
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -50,5 +51,14 @@ class ChatMessageController(private val chatMessageHandler: ChatMessageHandler) 
             .switchIfEmpty(
                 Mono.just(ResponseEntity.notFound().build())
             )
+            .contextWrite { context ->
+                val stopWatch = StopWatch()
+                stopWatch.start()
+                context.put(STOPWATCH_KEY, stopWatch)
+            }
+    }
+
+    companion object {
+        private const val STOPWATCH_KEY = "stopWatchKey"
     }
 }
