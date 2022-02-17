@@ -3,7 +3,7 @@ module "my-app-workload-identity" {
   name       = "cloud-bigtable-sample-sa"
   namespace  = "default"
   project_id = data.google_client_config.current.project
-  roles      = ["roles/bigtable.user"]
+  roles      = ["roles/bigtable.user", "roles/artifactregistry.reader"]
 }
 
 module "cluster1" {
