@@ -9,6 +9,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.bk.notification.model.ChatMessage
 import org.bk.notification.model.ChatRoom
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.autoconfigure.json.JsonTest
@@ -22,6 +23,7 @@ import java.time.Instant
 @JsonTest
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Disabled
 class BigtableNotificationsIntegrationTest {
     private lateinit var chatMessageRepository: BigtableChatMessageRepository
     private lateinit var chatRoomRepository: BigtableChatRoomRepository
