@@ -1,0 +1,2 @@
+bigtable:
+  instance-id: 'messages-instance'
