@@ -44,13 +44,17 @@ class ChatMessageController(private val chatMessageHandler: ChatMessageHandler) 
     fun getNotifications(
         @PathVariable("chatRoomId") chatRoomId: String,
         @PathVariable("chatMessageId") chatMessageId: String
-    ): Mono<ResponseEntity<ChatMessage>> {
+    ): Mono<ResponseEntity<WithTimeWrapper<ChatMessage>>> {
         return chatMessageHandler
             .getChatMessage(chatRoomId, chatMessageId)
-            .map { chatMessage -> ResponseEntity.ok(chatMessage) }
-            .switchIfEmpty(
-                Mono.just(ResponseEntity.notFound().build())
-            )
+            .flatMap { chatMessage ->
+                Mono.deferContextual { context ->
+                    val stopWatch = context.get<StopWatch>(STOPWATCH_KEY)
+                    stopWatch.stop()
+                    Mono.just(ResponseEntity.ok(WithTimeWrapper(chatMessage, stopWatch.totalTimeNanos)))
+                }
+            }
+            .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()))
             .contextWrite { context ->
                 val stopWatch = StopWatch()
                 stopWatch.start()
@@ -62,3 +66,8 @@ class ChatMessageController(private val chatMessageHandler: ChatMessageHandler) 
         private const val STOPWATCH_KEY = "stopWatchKey"
     }
 }
+
+data class WithTimeWrapper<T>(
+    val data: T,
+    val timeElapsedNanos:Long
+)

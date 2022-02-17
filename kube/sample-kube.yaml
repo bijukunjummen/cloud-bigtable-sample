@@ -31,8 +31,11 @@ spec:
       serviceAccountName: cloud-bigtable-sample-sa
       containers:
         - name: cloud-bigtable-sample
-          image: us-docker.pkg.dev/biju-altostrat-demo/docker-repo/cloud-bigtable-sample:latest
+          image: us-docker.pkg.dev/biju-altostrat-demo/docker-repo/cloud-bigtable-sample:b26ae2e
           imagePullPolicy: IfNotPresent
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "gcp"
           ports:
             - containerPort: 8080
           securityContext:
