@@ -12,12 +12,12 @@ output "project" {
   value = data.google_client_config.current.project
 }
 resource "google_bigtable_instance" "messages-instance" {
-  name = "messages-instance"
-  project = data.google_client_config.current.project
+  name                = "messages-instance"
+  project             = data.google_client_config.current.project
   deletion_protection = false
   cluster {
     cluster_id   = "messages-instance-cluster"
-    zone         = "us-west1-a"
+    zone         = "us-central1-a"
     num_nodes    = 3
     storage_type = "SSD"
   }
@@ -27,8 +27,8 @@ resource "google_bigtable_instance" "messages-instance" {
   }
 }
 
-resource "google_bigtable_table" "chat-messages" {
-  name          = "chat-messages"
+resource "google_bigtable_table" "chat_messages" {
+  name          = "chat_messages"
   instance_name = google_bigtable_instance.messages-instance.name
 
   lifecycle {
@@ -44,5 +44,5 @@ resource "google_bigtable_table" "chat-messages" {
 }
 
 output "tabledetails" {
-  value = google_bigtable_table.chat-messages.name
+  value = google_bigtable_table.chat_messages.name
 }
