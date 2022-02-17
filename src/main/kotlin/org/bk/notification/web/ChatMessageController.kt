@@ -51,7 +51,7 @@ class ChatMessageController(private val chatMessageHandler: ChatMessageHandler) 
                 Mono.deferContextual { context ->
                     val stopWatch = context.get<StopWatch>(STOPWATCH_KEY)
                     stopWatch.stop()
-                    Mono.just(ResponseEntity.ok(WithTimeWrapper(chatMessage, stopWatch.totalTimeNanos)))
+                    Mono.just(ResponseEntity.ok(WithTimeWrapper(chatMessage, stopWatch.totalTimeMillis)))
                 }
             }
             .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()))
@@ -69,5 +69,5 @@ class ChatMessageController(private val chatMessageHandler: ChatMessageHandler) 
 
 data class WithTimeWrapper<T>(
     val data: T,
-    val timeElapsedNanos:Long
+    val timeElapsedMillis: Long
 )
