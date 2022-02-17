@@ -85,7 +85,7 @@ class BigtableNotificationsIntegrationTest {
         @JvmStatic
         @Container
         private val emulator = BigtableEmulatorContainer(
-                DockerImageName.parse("gcr.io/google.com/cloudsdktool/cloud-sdk:316.0.0-emulators")
+                DockerImageName.parse("gcr.io/google.com/cloudsdktool/cloud-sdk:373.0.0-emulators")
         )
     }
 }
