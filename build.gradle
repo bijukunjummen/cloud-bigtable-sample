@@ -42,6 +42,7 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers:1.16.3")
     testImplementation("org.testcontainers:gcloud:1.16.3")
     testImplementation("org.testcontainers:junit-jupiter:1.16.3")
+    implementation("org.hdrhistogram:HdrHistogram")
 }
 
 test {
