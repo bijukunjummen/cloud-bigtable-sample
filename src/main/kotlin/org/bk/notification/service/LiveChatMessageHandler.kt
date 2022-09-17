@@ -23,7 +23,10 @@ class LiveChatMessageHandler(
     }
 
     override fun getOldChatMessages(chatRoomId: String): Flux<ChatMessage> {
-        return chatMessageRepository.getLatestSavedChatMessages(chatRoomId = chatRoomId, latestFirst = false)
+        return chatMessageRepository.getLatestSavedChatMessages(
+            chatRoomId = chatRoomId,
+            latestFirst = false
+        )
     }
 
     override fun getChatMessage(chatRoomId: String, chatMessageId: String): Mono<ChatMessage> {

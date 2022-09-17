@@ -88,10 +88,10 @@ class BigtableChatMessageRepository(private val bigtableDataClient: BigtableData
                     val microEpoch = chatMessage.creationDate.toEpochMilli() * 1000
                     val reversedEpoch = (FUTURE_2100_MICRO - microEpoch)
                     val paddedReversedEpoch = reversedEpoch.toString().padStart(18, '0')
-                    val TS_KEY = "MESSAGES/R#${chatMessage.chatRoomId}/TS#$paddedReversedEpoch/M#${chatMessage.id}"
+                    val rowKey = "MESSAGES/R#${chatMessage.chatRoomId}/TS#$paddedReversedEpoch/M#${chatMessage.id}"
                     val bulkMutation: BulkMutation = BulkMutation.create(TABLE_ID)
                             .add(key, Mutation.create().deleteRow())
-                            .add(TS_KEY, Mutation.create().deleteRow())
+                            .add(rowKey, Mutation.create().deleteRow())
                     bigtableDataClient.bulkMutateRowsAsync(bulkMutation)
                             .toMono()
                 }.thenReturn(true)

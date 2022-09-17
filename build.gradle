@@ -41,7 +41,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
-    implementation platform('com.google.cloud:libraries-bom:24.2.0')
+    implementation platform('com.google.cloud:libraries-bom:26.1.1')
     implementation('com.google.cloud:google-cloud-bigtable')
     testImplementation("org.testcontainers:testcontainers:${testContainersVersion}")
     testImplementation("org.testcontainers:gcloud:${testContainersVersion}")

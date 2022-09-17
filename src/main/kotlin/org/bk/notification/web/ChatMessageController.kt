@@ -5,18 +5,13 @@ import org.bk.notification.service.ChatMessageHandler
 import org.bk.notification.web.model.ChatMessageRequest
 import org.springframework.http.ResponseEntity
 import org.springframework.util.StopWatch
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 import java.time.Instant
 import java.util.*
+import kotlin.math.ceil
 
 @RestController
 @RequestMapping("/messages")
@@ -53,7 +48,14 @@ class ChatMessageController(private val chatMessageHandler: ChatMessageHandler) 
                 Mono.deferContextual { context ->
                     val stopWatch = context.get<StopWatch>(STOPWATCH_KEY)
                     stopWatch.stop()
-                    Mono.just(ResponseEntity.ok(WithTimeWrapper(chatMessage, stopWatch.totalTimeMillis)))
+                    Mono.just(
+                        ResponseEntity.ok(
+                            WithTimeWrapper(
+                                chatMessage,
+                                stopWatch.totalTimeMillis
+                            )
+                        )
+                    )
                 }
             }
             .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()))
@@ -74,7 +76,7 @@ class ChatMessageController(private val chatMessageHandler: ChatMessageHandler) 
         return Flux.range(1, count)
             .parallel(concurrent)
             .runOn(PAR_SCHEDULER)
-            .flatMap { c ->
+            .flatMap {
                 chatMessageHandler
                     .getChatMessage(chatRoomId, chatMessageId)
                     .flatMap { chatMessage ->
@@ -96,8 +98,8 @@ class ChatMessageController(private val chatMessageHandler: ChatMessageHandler) 
                 list.sort()
                 val map: LinkedHashMap<Int, Long> = listOf(50, 75, 95, 99)
                     .map { percentile ->
-                        val index = Math.ceil(percentile / 100.0 * list.size).toInt()
-                        percentile to list.get(index - 1)
+                        val index = ceil(percentile / 100.0 * list.size).toInt()
+                        percentile to list[index - 1]
                     }
                     .associateByTo(LinkedHashMap(), { pair -> pair.first }, { pair -> pair.second })
                 ResponseEntity.ok(PerfData(list.size, map))

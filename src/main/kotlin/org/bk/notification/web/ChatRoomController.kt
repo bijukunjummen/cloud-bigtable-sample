@@ -17,7 +17,10 @@ import reactor.core.publisher.Mono
 class ChatRoomController(
     private val chatRoomRepository: ChatRoomRepository
 ) {
-    @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping(
+        consumes = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
     fun createChatRoom(@RequestBody chatRoomRequest: ChatRoom): Mono<ChatRoom> {
         return chatRoomRepository.save(chatRoomRequest)
     }

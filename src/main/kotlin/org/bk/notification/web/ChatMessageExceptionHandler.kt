@@ -15,7 +15,12 @@ class ChatMessageExceptionHandler : WebFluxResponseStatusExceptionHandler() {
     fun handleChatRoomNotFoundException(chatRoomNotFoundException: ChatRoomNotFoundException): Mono<ResponseEntity<ErrorMessage>> {
         return Mono.just(
             ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ErrorMessage(msg = chatRoomNotFoundException.message ?: "", errors = emptyList()))
+                .body(
+                    ErrorMessage(
+                        msg = chatRoomNotFoundException.message ?: "",
+                        errors = emptyList()
+                    )
+                )
         )
     }
 }
