@@ -3,7 +3,11 @@ package org.bk.notification.service
 import com.google.api.core.ApiFuture
 import com.google.api.gax.rpc.ServerStream
 import com.google.cloud.bigtable.data.v2.BigtableDataClient
-import com.google.cloud.bigtable.data.v2.models.*
+import com.google.cloud.bigtable.data.v2.models.BulkMutation
+import com.google.cloud.bigtable.data.v2.models.Mutation
+import com.google.cloud.bigtable.data.v2.models.Query
+import com.google.cloud.bigtable.data.v2.models.Row
+import com.google.cloud.bigtable.data.v2.models.RowMutation
 import org.bk.notification.model.ChatMessage
 import org.bk.notification.toMono
 import reactor.core.publisher.Flux
