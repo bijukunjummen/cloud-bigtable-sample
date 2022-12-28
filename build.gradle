@@ -1,17 +1,17 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.6.21'
-    id 'org.jetbrains.kotlin.plugin.spring' version '1.6.21'
-    id 'org.springframework.boot' version '2.7.4'
-    id 'io.spring.dependency-management' version '1.0.14.RELEASE'
-    id 'com.google.cloud.tools.jib' version '3.3.0'
+    id 'org.jetbrains.kotlin.jvm' version '1.7.22'
+    id 'org.jetbrains.kotlin.plugin.spring' version '1.7.22'
+    id 'org.springframework.boot' version '3.0.1'
+    id 'io.spring.dependency-management' version '1.1.0'
+    id 'com.google.cloud.tools.jib' version '3.3.1'
 }
 
 group = 'org.bk'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '17'
 
-ext{
-    testContainersVersion = "1.17.0"
+ext {
+    testContainersVersion = "1.17.6"
 }
 
 repositories {
@@ -40,13 +40,12 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
-    implementation platform('com.google.cloud:libraries-bom:26.1.1')
+    testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
+    implementation platform('com.google.cloud:libraries-bom:26.2.0')
     implementation('com.google.cloud:google-cloud-bigtable')
     testImplementation("org.testcontainers:testcontainers:${testContainersVersion}")
     testImplementation("org.testcontainers:gcloud:${testContainersVersion}")
     testImplementation("org.testcontainers:junit-jupiter:${testContainersVersion}")
-    implementation("org.hdrhistogram:HdrHistogram")
 }
 
 test {

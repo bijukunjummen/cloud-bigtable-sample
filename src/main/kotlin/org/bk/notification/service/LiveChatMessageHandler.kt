@@ -2,6 +2,7 @@ package org.bk.notification.service
 
 import org.bk.notification.exception.ChatRoomNotFoundException
 import org.bk.notification.model.ChatMessage
+import org.bk.notification.model.Page
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -31,5 +32,9 @@ class LiveChatMessageHandler(
 
     override fun getChatMessage(chatRoomId: String, chatMessageId: String): Mono<ChatMessage> {
         return chatMessageRepository.getChatMessage(chatRoomId, chatMessageId)
+    }
+
+    override fun getPaginatedMessages(chatRoomId: String, offset: String, count: Long): Page<ChatMessage> {
+        return chatMessageRepository.getPaginatedMessages(chatRoomId, offset, count)
     }
 }

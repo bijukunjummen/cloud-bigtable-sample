@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  title: Live Notifications
+  title: Messages
   description: |
     Service providing live notifications using SSE
   version: 1.0.0
@@ -67,3 +67,10 @@ components:
           format: date-time
         payload:
           type: object
+    Page:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object

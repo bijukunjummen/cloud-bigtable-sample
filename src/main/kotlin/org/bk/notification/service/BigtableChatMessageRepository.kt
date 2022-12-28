@@ -3,12 +3,9 @@ package org.bk.notification.service
 import com.google.api.core.ApiFuture
 import com.google.api.gax.rpc.ServerStream
 import com.google.cloud.bigtable.data.v2.BigtableDataClient
-import com.google.cloud.bigtable.data.v2.models.BulkMutation
-import com.google.cloud.bigtable.data.v2.models.Mutation
-import com.google.cloud.bigtable.data.v2.models.Query
-import com.google.cloud.bigtable.data.v2.models.Row
-import com.google.cloud.bigtable.data.v2.models.RowMutation
+import com.google.cloud.bigtable.data.v2.models.*
 import org.bk.notification.model.ChatMessage
+import org.bk.notification.model.Page
 import org.bk.notification.toMono
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -23,20 +20,25 @@ class BigtableChatMessageRepository(private val bigtableDataClient: BigtableData
         val tsKey = "MESSAGES/R#${chatMessage.chatRoomId}/TS#$paddedReversedEpoch/M#${chatMessage.id}"
         val creationTs: Long = chatMessage.creationDate.toEpochMilli() * 1_000
         val mutation: Mutation = Mutation.create()
-                .setCell(CHAT_MESSAGE_DETAILS_FAMILY, ID_QUALIFIER, chatMessage.id)
-                .setCell(CHAT_MESSAGE_DETAILS_FAMILY, CHAT_ROOM_ID_QUALIFIER, chatMessage.chatRoomId)
-                .setCell(CHAT_MESSAGE_DETAILS_FAMILY, CREATION_DATE_QUALIFIER, creationTs, chatMessage.creationDate.toString())
-                .setCell(CHAT_MESSAGE_DETAILS_FAMILY, PAYLOAD_QUALIFIER, chatMessage.payload)
+            .setCell(CHAT_MESSAGE_DETAILS_FAMILY, ID_QUALIFIER, chatMessage.id)
+            .setCell(CHAT_MESSAGE_DETAILS_FAMILY, CHAT_ROOM_ID_QUALIFIER, chatMessage.chatRoomId)
+            .setCell(
+                CHAT_MESSAGE_DETAILS_FAMILY,
+                CREATION_DATE_QUALIFIER,
+                creationTs,
+                chatMessage.creationDate.toString()
+            )
+            .setCell(CHAT_MESSAGE_DETAILS_FAMILY, PAYLOAD_QUALIFIER, chatMessage.payload)
 
         val mutationTs: Mutation = Mutation.create()
-                .setCell(CHAT_MESSAGE_DETAILS_FAMILY, ID_QUALIFIER, chatMessage.id)
+            .setCell(CHAT_MESSAGE_DETAILS_FAMILY, ID_QUALIFIER, chatMessage.id)
 
         val rowMutation = RowMutation.create(TABLE_ID, key, mutation)
         val rowMutationReversedTime = RowMutation.create(TABLE_ID, tsKey, mutationTs)
         val result: ApiFuture<Void> = bigtableDataClient.mutateRowAsync(rowMutation)
         val resultReversedTime: ApiFuture<Void> = bigtableDataClient.mutateRowAsync(rowMutationReversedTime)
         return Mono.zipDelayError(result.toMono(), resultReversedTime.toMono())
-                .thenReturn(chatMessage)
+            .thenReturn(chatMessage)
     }
 
     override fun getChatMessage(chatRoomId: String, chatMessageId: String): Mono<ChatMessage> {
@@ -66,39 +68,64 @@ class BigtableChatMessageRepository(private val bigtableDataClient: BigtableData
         }
     }
 
+    override fun getPaginatedMessages(chatRoomId: String, offset: String, count: Long): Page<ChatMessage> {
+        val keyPrefix = "MESSAGES/R#${chatRoomId}/TS#"
+        val query: Query =
+            if (offset.isNotEmpty()) {
+                Query.create(TABLE_ID).limit(count)
+                    .range(Range.ByteStringRange.prefix(keyPrefix).startOpen(offset))
+            } else Query.create(TABLE_ID).limit(count).prefix(keyPrefix)
+
+        val rows: List<Row> = bigtableDataClient.readRows(query).toList()
+        val chatMessages: List<ChatMessage> = rows.map { row ->
+            val chatMessageId: String =
+                row.getCells(CHAT_MESSAGE_DETAILS_FAMILY, ID_QUALIFIER).first().value.toStringUtf8()
+            val chatMessageKey = "MESSAGES/R#${chatRoomId}/M#${chatMessageId}"
+            toChatMessage(bigtableDataClient.readRow(TABLE_ID, chatMessageKey))
+        }
+        val lastRowIndex = rows.lastIndex
+        val returnFrom = if (lastRowIndex == -1) {
+            offset
+        } else {
+            rows.get(lastRowIndex).key.toStringUtf8()
+        }
+        return Page(chatMessages, returnFrom)
+    }
+
     private fun toChatMessage(row: Row): ChatMessage {
         val id: String = row.getCells(CHAT_MESSAGE_DETAILS_FAMILY, ID_QUALIFIER).first().value.toStringUtf8()
         val chatRoomId: String = row.getCells(CHAT_MESSAGE_DETAILS_FAMILY, CHAT_ROOM_ID_QUALIFIER)
-                .first()
-                .value
-                .toStringUtf8()
+            .first()
+            .value
+            .toStringUtf8()
         val creationDateAsString: String = row.getCells(CHAT_MESSAGE_DETAILS_FAMILY, CREATION_DATE_QUALIFIER)
-                .first()
-                .value
-                .toStringUtf8()
+            .first()
+            .value
+            .toStringUtf8()
 
         val payload = row.getCells(CHAT_MESSAGE_DETAILS_FAMILY, PAYLOAD_QUALIFIER).first().value.toStringUtf8()
         return ChatMessage(
-                id = id,
-                creationDate = Instant.parse(creationDateAsString),
-                chatRoomId = chatRoomId,
-                payload = payload)
+            id = id,
+            creationDate = Instant.parse(creationDateAsString),
+            chatRoomId = chatRoomId,
+            payload = payload
+        )
     }
 
     override fun deleteChatMessage(chatRoomId: String, chatMessageId: String): Mono<Boolean> {
         return getChatMessage(chatRoomId, chatMessageId)
-                .flatMap { chatMessage ->
-                    val key = "MESSAGES/R#${chatMessage.chatRoomId}/M#${chatMessage.id}"
-                    val microEpoch = chatMessage.creationDate.toEpochMilli() * 1000
-                    val reversedEpoch = (FUTURE_2100_MICRO - microEpoch)
-                    val paddedReversedEpoch = reversedEpoch.toString().padStart(18, '0')
-                    val rowKey = "MESSAGES/R#${chatMessage.chatRoomId}/TS#$paddedReversedEpoch/M#${chatMessage.id}"
-                    val bulkMutation: BulkMutation = BulkMutation.create(TABLE_ID)
-                            .add(key, Mutation.create().deleteRow())
-                            .add(rowKey, Mutation.create().deleteRow())
-                    bigtableDataClient.bulkMutateRowsAsync(bulkMutation)
-                            .toMono()
-                }.thenReturn(true)
+            .flatMap { chatMessage ->
+                val key = "MESSAGES/R#${chatMessage.chatRoomId}/M#${chatMessage.id}"
+                val microEpoch = chatMessage.creationDate.toEpochMilli() * 1000
+                val reversedEpoch = (FUTURE_2100_MICRO - microEpoch)
+                val paddedReversedEpoch = reversedEpoch.toString().padStart(18, '0')
+                val rowKey = "MESSAGES/R#${chatMessage.chatRoomId}/TS#$paddedReversedEpoch/M#${chatMessage.id}"
+                val bulkMutation: BulkMutation = BulkMutation.create(TABLE_ID)
+                    .add(key, Mutation.create().deleteRow())
+                    .add(rowKey, Mutation.create().deleteRow())
+                bigtableDataClient.bulkMutateRowsAsync(bulkMutation)
+                    .toMono()
+            }.thenReturn(true)
     }
 
     companion object {

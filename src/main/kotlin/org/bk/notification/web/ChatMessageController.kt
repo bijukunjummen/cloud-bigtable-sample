@@ -1,6 +1,7 @@
 package org.bk.notification.web
 
 import org.bk.notification.model.ChatMessage
+import org.bk.notification.model.Page
 import org.bk.notification.service.ChatMessageHandler
 import org.bk.notification.web.model.ChatMessageRequest
 import org.springframework.http.ResponseEntity
@@ -30,6 +31,14 @@ class ChatMessageController(private val chatMessageHandler: ChatMessageHandler) 
                 payload = request.payload
             )
         )
+    }
+
+    @GetMapping(path = ["/{chatRoomId}/historic"])
+    fun getHistoricNotifications(
+        @PathVariable("chatRoomId") chatRoomId: String,
+        @RequestParam("offset") offset: String
+    ): Page<ChatMessage> {
+        return chatMessageHandler.getPaginatedMessages(chatRoomId, offset)
     }
 
     @GetMapping(path = ["/{chatRoomId}"])
