@@ -36,9 +36,10 @@ class ChatMessageController(private val chatMessageHandler: ChatMessageHandler) 
     @GetMapping(path = ["/{chatRoomId}/historic"])
     fun getHistoricNotifications(
         @PathVariable("chatRoomId") chatRoomId: String,
-        @RequestParam("offset") offset: String
+        @RequestParam("offset") offset: String,
+        @RequestParam(name = "limit", defaultValue = "25") limit: Long
     ): Page<ChatMessage> {
-        return chatMessageHandler.getPaginatedMessages(chatRoomId, offset)
+        return chatMessageHandler.getPaginatedMessages(chatRoomId, offset, limit)
     }
 
     @GetMapping(path = ["/{chatRoomId}"])

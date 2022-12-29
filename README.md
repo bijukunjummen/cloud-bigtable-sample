@@ -7,6 +7,7 @@
 gcloud components install bigtable
 gcloud beta emulators bigtable start --host-port=0.0.0.0:8086
 
+# In another window
 export BIGTABLE_EMULATOR_HOST=localhost:8086
 cbt -project "project-id" -instance "bus-instance" createtable chat_messages
 cbt -project "project-id" -instance "bus-instance" createfamily chat_messages chatRoomDetails
